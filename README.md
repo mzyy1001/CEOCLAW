@@ -2,10 +2,6 @@
 
 CEOClaw is an **OpenClaw-based founder agent harness** that acts like an AI startup founder.
 
-It extends OpenClaw with founder-level capabilities to take a startup from **idea → launch → first customers**, with the goal of reaching **$100 MRR**.
-
-![CEOClaw Pipeline](assets/CEOCLAW.drawio.png)
-
 ## What CEOClaw Does
 
 CEOClaw executes multi-step business workflows across four core areas:
@@ -46,118 +42,132 @@ CEOClaw executes multi-step business workflows across four core areas:
 ## Architecture
 
 CEOClaw is organized into three layers.
+![CEOClaw Pipeline](assets/CEOCLAW.drawio.png)
 
-### 1. Startup Layer
+## Multi-Agent System Design
 
-Flow:
+CEOClaw is implemented as a **multi-agent founder system** coordinated by a central **CEO Agent**.
 
-**Start**  
-→ **Idea Generation**  
-→ **Automated Research**  
-→ **Is the Idea Validated?**  
-→ **Generate Web Product and Landing Page**
+Rather than exposing multiple agents directly to the user, the system uses a **single front-facing CEO layer** and several specialist agents behind it. This keeps the interaction coherent while allowing the system to perform specialized founder tasks across product, research, marketing, sales, monitoring, and web execution.
 
-Notes:
-- Idea generation can be interactive or autonomous.
-- Automated research can include trend discovery, competitor analysis, and audience research.
-- Validation can be done by the CEO agent, a human founder, or both.
+### Agent Roles
 
-### 2. Operations Strategy Layer
+#### CEO Agent
+The CEO Agent is the orchestrator of the whole system. It is responsible for:
+- interacting with the user
+- routing tasks to the right specialist agent
+- collecting and summarizing reports
+- making strategic recommendations
+- requesting human approval at key decision gates
 
-This layer contains three strategic loops.
+#### Research Agent
+The Research Agent handles all research-heavy tasks, including:
+- automated research
+- market research
+- competitor analysis
+- social listening
+- idea validation briefs
 
-#### A. Marketing Strategy
+It also supports other agents when market evidence is needed.
 
-Flow:
+#### Marketing Agent
+The Marketing Agent is responsible for:
+- marketing strategy generation
+- campaign planning
+- SEO experiment design
+- messaging ideas
+- virtual testing of marketing strategies
 
-**Start**  
-→ **Marketing Strategy Generation**  
-→ **Virtual Testing & Market Research**  
-→ **CEO: Adopt This Strategy?**  
-→ **Deploy**
+#### Product Agent
+The Product Agent handles product-side planning, including:
+- product strategy generation
+- feature planning
+- product iteration planning
+- pricing, onboarding, and UX updates
+- virtual testing of product changes
 
-Notes:
-- Virtual testing may use social listening sub-models, simulated A/B testing, and market research agents.
-- The CEO layer decides whether a strategy should be deployed.
+#### Sales Agent
+The Sales Agent is responsible for:
+- customer discovery
+- prospect research
+- outreach generation
+- lead qualification
+- sales execution support
 
-#### B. Performance Monitor
-
-Flow:
-
-**Start**  
-→ **Track Metrics**  
-→ **Data Analysis**  
-→ **CEO: Strategic Decision**
-
-Possible outputs:
-- Continue current strategy
-- Launch a **new marketing strategy**
-- Build a **new product**
-- Trigger product iteration
-
-Tracked signals may include:
-- Traffic
-- Signups
-- Revenue
+#### Monitoring Agent
+The Monitoring Agent tracks and analyzes business signals, including:
+- traffic
+- signups
+- revenue
 - ROI
-- Funnel performance
-- Feedback quality
+- funnel performance
 
-#### C. Product Iteration
+It produces monitoring briefs that help the CEO Agent decide whether to continue, pivot, launch a new strategy, or update the product.
 
-Flow:
+#### Web Agent
+The Web Agent is responsible for web-facing artifacts and deployment-oriented outputs, including:
+- landing page generation
+- simple web product generation
+- web asset updates
+- exportable deployment artifacts
 
-**Start**  
-→ **Generate Product Strategy**  
-→ **Virtual Testing**  
-→ **CEO: Update Product?**  
-→ **Deploy**
+### Workflow Ownership by Layer
 
-Notes:
-- Product updates can include feature changes, UX changes, pricing tests, and landing-page improvements.
-- The iteration loop is driven by feedback, usage signals, and business performance.
+#### Startup Layer
+- **CEO Agent**: start, idea generation, validation decision
+- **Research Agent**: automated research
+- **Web Agent**: generate web product and landing page
+- **Product Agent**: optional support for product specification
 
-### 3. Execution Layer
+#### Operations Strategy Layer
 
-#### Sales
+**Marketing Strategy**
+- **Marketing Agent**: marketing strategy generation
+- **Marketing Agent + Research Agent**: virtual testing and market research
+- **CEO Agent**: adopt / reject strategy decision
+- **Web Agent**: deployment of web-facing marketing assets
 
-Flow:
+**Performance Monitor**
+- **Monitoring Agent**: track metrics and data analysis
+- **CEO Agent**: strategic decision based on performance signals
 
-**Start**  
-→ **Customer Discovery**  
-→ **Customer Outreach**  
-→ **Sales Execution**
+**Product Iteration**
+- **Product Agent**: generate product strategy
+- **Product Agent + Research Agent**: virtual testing
+- **CEO Agent**: update product decision
+- **Web Agent**: deployment of updated product assets
 
-Notes:
-- Customer discovery can be handled by research agents.
-- Outreach can be agent-assisted.
-- Sales execution may remain partially human-guided in early-stage scenarios.
+#### Execution Layer
+- **Sales Agent**: customer discovery, customer outreach, sales execution
+- **Research Agent**: optional support for prospect and market research
+- **CEO Agent**: approval and escalation for sensitive actions
 
-## CEO Decision Layer
+### Collaboration Model
 
-A core design choice of CEOClaw is that strategic decisions are not always fully automated.
+The system is designed around a **CEO-led coordination model**.
 
-The **CEO layer** can run in two modes:
+Specialist agents do not freely call one another. Instead:
+1. the user interacts with the CEO Agent
+2. the CEO Agent assigns a task to a specialist agent
+3. the specialist agent reads the current project state and writes a structured report
+4. the CEO Agent reads the report and decides what happens next
 
-- **Autonomous mode**: the CEO agent makes decisions directly from business signals
-- **Human-guided mode**: a human founder provides judgment and overrides when needed
+This creates a clean collaboration pattern:
 
-This is important because startup decisions often depend on a latent internal reward function: market sense, risk preference, product taste, and long-term judgment.
+**User → CEO Agent → Specialist Agent → Report / Shared State → CEO Agent**
 
-## What Is Added Beyond Base OpenClaw
+This design makes the system easier to control, easier to debug, and closer to how a real startup founder coordinates different functional teams.
 
-Compared with base OpenClaw, CEOClaw adds:
+### Human-in-the-Loop Decision Gates
 
-- A startup execution architecture for **idea → launch → growth**
-- Specialized founder workflows for **product, marketing, sales, and operations**
-- A strategic **CEO approval loop**
-- Market research and social listening agents
-- Virtual testing modules for strategy and product decisions
-- Monitoring and iteration loops tied to real business metrics
+A core principle of CEOClaw is that not all founder decisions should be fully automated.
 
+At key moments such as:
+- idea validation
+- marketing strategy adoption
+- product update decisions
+- sensitive sales actions
 
-## Goal
+the CEO Agent can pause and ask for **human approval**.
 
-CEOClaw is designed to demonstrate a working founder agent loop that performs real business tasks and pushes toward:
-
-**first users, first customers, and $100 MRR**
+This keeps the system aligned with real founder workflows, where high-level judgment, risk tolerance, and long-term direction are still best handled by a human decision-maker.
